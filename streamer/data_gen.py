@@ -133,7 +133,7 @@ if __name__ == '__main__':
             print(
                 'pub_sub_message_id: {}'.format(pub_sub_message_unique_id.result()))
 
-          # Random sleep time in milli-seconds.
+        # Random sleep time in milli-seconds.
         if (logging_enabled):
             print('Sleeping for {} ms'.format(sleep_time))
         time.sleep(sleep_time / 1000)
