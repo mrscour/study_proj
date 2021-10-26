@@ -1,8 +1,9 @@
 # very first study project
 Example start launch string for data generator:
 
-python /home/nyancatashole/study_proj data_get.py\
+cd ~/study_proj
+python  data_get.py \
 --topic topic1 \
 --project-id $PROJECT_ID \
 --enable-log true \
---sleep_time 1000
+--sleep_time 5000
