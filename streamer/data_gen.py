@@ -29,8 +29,8 @@ def build_uid_registration():
                     user_name = fake.name(),
                     user_phone = fake.msisdn(),
                     user_email = fake.email(),
-                    debit_amount = 0,
-                    credit_amount = 0,
+                    debit_amount = float(0),
+                    credit_amount = float(0),
                     currency = fake.currency_code()
                     )
 
@@ -50,7 +50,7 @@ def build_bet_results():
     else:
         results = 'loss'
         bet_amount = round(random.uniform(10, 1000), 2)
-        win_amount = 0
+        win_amount = float(0)
         users_pool[uid]['debit_amount'] += bet_amount
 
     return dict(
