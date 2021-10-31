@@ -8,10 +8,9 @@ python data_gen.py \
 --enable-log true \
 --sleep_time 100
 
-Example start launch string for data processing:
-cd ~/study_proj
-python data_gen.py \
+python process_dataflow.py \
 --topic topic1 \
---project-id tribal-bonsai-330115 \
---enable-log true \
---sleep_time 100
+--project_id tribal-bonsai-330115 \
+--input_subscription projects/tribal-bonsai-330115/subscriptions/mySub1 \
+--bigquery_dataset study_project \
+--bigquery_table trans_test users_test
