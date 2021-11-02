@@ -90,8 +90,8 @@ if __name__ == '__main__':
                                 default=False,
                                 help='print logs')
     cmd_flags_parser.add_argument('--sleep_time', type=int,
-                                help='Sleep time > 1000 ms',
-                                default=10000)
+                                help='Sleep time > 100 ms',
+                                default=5000)
     # Extract command-line arguments
     cmd_arguments = cmd_flags_parser.parse_args()
 
@@ -103,8 +103,8 @@ if __name__ == '__main__':
     publisher = pubsub_v1.PublisherClient()
     start_time = time.time()
     sleep_time = cmd_arguments.sleep_time
-    if sleep_time < 1000:
-        cmd_flags_parser.error('Minimum sleeping time is 1000ms')
+    if sleep_time < 100:
+        cmd_flags_parser.error('Minimum sleeping time is 100ms')
     topic_path = publisher.topic_path(gcp_project_id, pub_sub_topic)
     users_pool = {}
     fake = faker.Faker()
