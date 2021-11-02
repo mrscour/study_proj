@@ -46,12 +46,15 @@ def build_bet_results():
         bet_amount = round(random.uniform(10, 1000), 2)
         win_amount = round(bet_amount * random.uniform(0.5, 4), 2)
         users_pool[uid]['debit_amount'] += bet_amount
+        users_pool[uid]['debit_amount'] = round(users_pool[uid]['debit_amount'], 2)
         users_pool[uid]['credit_amount'] += win_amount
+        users_pool[uid]['credit_amount'] = round(users_pool[uid]['credit_amount'], 2)
     else:
         results = 'loss'
         bet_amount = round(random.uniform(10, 1000), 2)
         win_amount = float(0)
         users_pool[uid]['debit_amount'] += bet_amount
+        users_pool[uid]['debit_amount'] = round(users_pool[uid]['debit_amount'], 2)
 
     return dict(
                 uid=uid, # Use random uids of users currently on website
