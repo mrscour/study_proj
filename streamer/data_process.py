@@ -52,12 +52,15 @@ class SplitTables(beam.DoFn):
     """
     def process(self, element, *args, **kwargs):
         element = json.loads(element.decode('utf-8'))
-        users_data = element.pop('user_info')
-        users_data['uid'] = element['uid']
-        transactions_data = element
-        yield users_data
-        yield transactions_data
-
+        try:
+            users_data = element.pop('user_info')
+            users_data['uid'] = element['uid']
+            transactions_data = element
+            yield users_data
+            yield transactions_data
+        except (ValueError, AttributeError) as e:
+            logging.info(f"[Invalid Data] ({e}) - {element}")
+            pass
 
 class GroupWindowsIntoBatches(beam.PTransform):
     """A composite transform that groups Pub/Sub messages based on publish
