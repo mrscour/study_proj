@@ -1,4 +1,4 @@
-# very first study project
+# DataART study project
 Example start launch string for data generator:
 
 cd ~/study_proj
@@ -6,7 +6,9 @@ python data_gen.py \
 --topic topic1 \
 --project-id tribal-bonsai-330115 \
 --enable-log true \
---sleep_time 100
+--sleep_time 100 \
+--api-key a21749a**********9b0fb04
+# api key used for access to exchange api
 
 Example launch string for data processor on Direct runner:
 
