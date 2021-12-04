@@ -8,7 +8,7 @@ python data_gen.py \
 --enable-log true \
 --sleep_time 100 \
 --api-key a21749a**********9b0fb04
-# api key used for access to exchange api
+api key used for access to exchange api
 
 Example launch string for data processor on Direct runner:
 
