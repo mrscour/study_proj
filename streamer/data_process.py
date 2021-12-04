@@ -3,7 +3,6 @@ import datetime
 import json
 import logging
 import sys
-import io
 
 import apache_beam as beam
 import apache_beam.transforms.window as window
@@ -52,15 +51,13 @@ class SplitTables(beam.DoFn):
     """
     def process(self, element, *args, **kwargs):
         element = json.loads(element.decode('utf-8'))
-        try:
-            users_data = element.pop('user_info')
-            users_data['uid'] = element['uid']
-            transactions_data = element
-            yield users_data
-            yield transactions_data
-        except (ValueError, AttributeError) as e:
-            logging.info(f"[Invalid Data] ({e}) - {element}")
-            pass
+        users_data = element.pop('user_info')
+        users_data['uid'] = element['uid']
+        users_data['timestamp'] = element['timestamp']
+        transactions_data = element
+        yield users_data
+        yield transactions_data
+
 
 class GroupWindowsIntoBatches(beam.PTransform):
     """A composite transform that groups Pub/Sub messages based on publish
@@ -83,11 +80,11 @@ class GroupWindowsIntoBatches(beam.PTransform):
 
 class SplitBatch(beam.DoFn):
     """Split entire batch to ones based on a keyword
-    requuired before writing it to separate bigquery tables
+    required before writing it to separate bigquery tables
     """
     def __init__(self, keyword='user_name'):
         self.keyword = keyword
-
+    
     def process(self, tables):
         users_table = [i for i in tables if self.keyword in i]
         transactions_table = [i for i in tables if self.keyword not in i]
@@ -107,7 +104,6 @@ class WriteToBigQuery(beam.DoFn):
         self.client = bigquery.Client()
 
     def process(self, table):
-        print(table)
         job_config = bigquery.LoadJobConfig(
             autodetect=True,
             source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
@@ -120,7 +116,6 @@ class WriteToBigQuery(beam.DoFn):
         )
 
         table_id = f"{self.bq_dataset}.{self.bq_tables}"
-        print(table_id)
         try:
             load_job = self.client.load_table_from_json(
                 table,
