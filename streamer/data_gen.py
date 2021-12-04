@@ -1,4 +1,5 @@
 import argparse
+import requests
 import datetime
 import json
 import random
@@ -25,13 +26,17 @@ def build_uid_registration():
     uid = random.randint(elapsed_tens_minutes + present_millis,
                         (10 + elapsed_tens_minutes) * present_millis)
     # Perform user registration on the website
+    currency = fake.currency_code()
+    # not supported currencies
+    while currency in not_supported:
+        currency = fake.currency_code()
     return uid, dict(
                     user_name = fake.name(),
                     user_phone = fake.msisdn(),
                     user_email = fake.email(),
                     debit_amount = float(0),
                     credit_amount = float(0),
-                    currency = fake.currency_code()
+                    currency = currency
                     )
 
 
@@ -56,20 +61,29 @@ def build_bet_results():
         users_pool[uid]['debit_amount'] += bet_amount
         users_pool[uid]['debit_amount'] = round(users_pool[uid]['debit_amount'], 2)
 
+    # generate conversion rate on the moment of bet
+    url = 'https://v6.exchangerate-api.com/v6/' + key + '/pair/EUR/' + users_pool[uid]['currency']
+    response = requests.get(url)
+    if response.status_code != 200:
+        raise Exception(f'{response.status_code} error happened while {url} requested.')
+    data = response.json()
+    print(users_pool[uid]['currency'])
+    conversion = round(float(data['conversion_rate']), 2)
     return dict(
-                uid=uid, # Use random uids of users currently on website
+                uid=uid, # Use random uids of users currently registered on website
                 user_info = users_pool[uid],
                 round_results = results,
                 bet_amount = bet_amount,
                 win_amount = win_amount,
-                timestamp=datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+                timestamp=datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+                conversion_rate_EUR = conversion
                 )
 
 
 def send_to_pub_sub(message):
     """ Sends the provided payload as JSON to Pub/Sub.
     :param message: the Event information payload
-    :return: the published message future.
+    :return: the published message.
     """
     return publisher.publish(topic_path,
                             data=json.dumps(message).encode('utf-8'))
@@ -92,6 +106,8 @@ if __name__ == '__main__':
     cmd_flags_parser.add_argument('--sleep_time', type=int,
                                 help='Sleep time > 100 ms',
                                 default=5000)
+    cmd_flags_parser.add_argument('--api-key', type=str,
+                                help='API key for conversion https://www.exchangerate-api.com/')
     # Extract command-line arguments
     cmd_arguments = cmd_flags_parser.parse_args()
 
@@ -100,11 +116,13 @@ if __name__ == '__main__':
     send_event_count = cmd_arguments.event_count  # Default send infinite messages
     pub_sub_topic = cmd_arguments.topic
     gcp_project_id = cmd_arguments.project_id
+    not_supported = ['MRO', 'KPW', 'NIS', 'LTL'] # not supported currency codes
     publisher = pubsub_v1.PublisherClient()
     start_time = time.time()
     sleep_time = cmd_arguments.sleep_time
     if sleep_time < 100:
         cmd_flags_parser.error('Minimum sleeping time is 100ms')
+    key = cmd_arguments.api_key
     topic_path = publisher.topic_path(gcp_project_id, pub_sub_topic)
     users_pool = {}
     fake = faker.Faker()
